@@ -1,0 +1,13 @@
+{
+  "name": "learning-user-authentication",
+  "version": "0.0.1",
+  "description": "Code for integrating user authentication into chat server",
+  "dependencies": {
+    "body-parser": "^1.9.2",
+    "express": "^4.9.5",
+    "passport": "^0.2.1",
+    "passport-local": "^1.0.0",
+    "redis": "^0.12.1",
+    "socket.io": "^1.1.0"
+  }
+}

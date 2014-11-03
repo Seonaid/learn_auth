@@ -20,15 +20,23 @@ app.use('/', express.static(__dirname + '/public'));
 app.post('/register', function(req, res){
 	var username = req.body.username;
 	var password = req.body.password;
-	client.get("my_new_user", function(error, reply){
-		var hashName = "user:" + reply;
-		client.set(username, reply); //now we can look up by username
-		client.hmset(hashName, "name", username); // and we can then look up username:Id
-		client.hmset(hashName, "password", password);
-		client.incr("my_new_user");
-	});
-	console.log("hi " + username);
-	res.sendFile(__dirname + '/main.html');
+	client.exists(username, function(error, exists){
+		if(!exists){
+			client.get("my_new_user", function(error, reply){
+				var hashName = "user:" + reply;
+				client.set(username, reply); //now we can look up by username
+				client.hmset(hashName, "name", username); // and we can then look up username:Id
+				client.hmset(hashName, "password", password);
+				client.incr("my_new_user");
+			});
+			console.log("hi " + username);
+			res.sendFile(__dirname + '/main.html');
+		} else {
+			res.send("User already exists.");
+
+		} // end of if structure
+	}); // end of client.exists
+
 });
 
 app.post('/login', function(req, res){
@@ -37,7 +45,7 @@ app.post('/login', function(req, res){
 	console.log(username, password);
 	client.exists(username, function(error, exists){
 		if(!exists){
-			res.sendFile(__dirname + '/login.html');
+			res.sendFile(__dirname + '/login.html'); //if the user is not registered
 		} else {
 			client.get(username, function(error, reply){
 				hashName = "user:" + reply;
@@ -46,9 +54,9 @@ app.post('/login', function(req, res){
 					console.log("password is " + password);
 					console.log("returned is " + reply);
 					if(reply === password){
-						res.sendFile(__dirname + '/main.html');
+						res.sendFile(__dirname + '/main.html'); // success!
 					} else {
-						res.sendFile(__dirname + '/login.html');
+						res.sendFile(__dirname + '/login.html'); // if the password is wrong
 					}
 				});
 			});
